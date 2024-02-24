@@ -5,7 +5,7 @@ const PORT = 8080;
 const generateRandomString = function() {
  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let result = "";
-  for (let i = 0; i < length; i++) {
+  for (let i = 0; i < chars.length; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return result.slice(0, 6);
@@ -37,15 +37,23 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+app.post("/urls", (req, res) => {
+  const longURL = req.body.longURL;
+  const id = generateRandomString();
+  urlDatabase[id] = longURL;
+  res.redirect(`/urls/${id}`);
+});
+
 app.get("/urls/:id", (req, res) => {
   const id = req.params.id;
   const templateVars = { id: id, longURL: urlDatabase[id] };
   res.render("urls_show", templateVars);
 });
 
-app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+app.get("/u/:id", (req, res) => {
+  const id = req.params.id;
+  const longURL = urlDatabase[id];
+  res.redirect(longURL);
 });
 
 app.get("/hello", (req, res) => {
