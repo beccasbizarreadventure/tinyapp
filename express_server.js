@@ -28,6 +28,13 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+app.post("/urls/:id", (req, res) => {
+  const longURL = req.body.longURL;
+  const id = req.params.id;
+  urlDatabase[id] = longURL;
+  res.redirect("/urls");
+});
+
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
