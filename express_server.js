@@ -40,7 +40,7 @@ app.post("/urls/:id", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const username = req.cookies["name"];
-  res.render("urls_new", { name: username });
+  res.render("urls_new", { username });
 });
 
 app.get("/urls", (req, res) => {
