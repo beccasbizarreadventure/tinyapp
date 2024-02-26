@@ -57,6 +57,12 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${id}`);
 });
 
+app.post("/login", (req, res) => {
+  const username = req.body.username;
+  res.cookie('name', username);
+  res.redirect("/urls");
+})
+
 app.get("/urls/:id", (req, res) => {
   const id = req.params.id;
   const templateVars = { id: id, longURL: urlDatabase[id] };
