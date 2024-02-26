@@ -14,6 +14,8 @@ const generateRandomString = function() {
 
 app.set("view engine", "ejs");
 
+app.use(cookieParser());
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -37,11 +39,14 @@ app.post("/urls/:id", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const username = req.cookies["name"];
+  res.render("urls_new", { name: username });
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = { 
+    urls: urlDatabase,
+    username: req.cookies["name"] };
   res.render("urls_index", templateVars);
 });
 
@@ -66,7 +71,11 @@ app.post("/login", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
   const id = req.params.id;
-  const templateVars = { id: id, longURL: urlDatabase[id] };
+  const templateVars = { 
+    id: id, 
+    longURL: urlDatabase[id],
+    username: req.cookies["name"]
+  };
   res.render("urls_show", templateVars);
 });
 
