@@ -31,6 +31,15 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+app.get("/register", (req, res) => {
+  const username = req.cookies["name"];
+  res.render("register", { username });
+});
+
+app.post("/register", (req, res) => {
+  res.redirect("/urls");
+});
+
 app.post("/urls/:id", (req, res) => {
   const longURL = req.body.longURL;
   const id = req.params.id;
@@ -40,7 +49,7 @@ app.post("/urls/:id", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const username = req.cookies["name"];
-  res.render("urls_new", { name: username });
+  res.render("urls_new", { username });
 });
 
 app.get("/urls", (req, res) => {
