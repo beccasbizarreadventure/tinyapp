@@ -57,18 +57,15 @@ app.post("/register", (req, res) => {
     email: req.body.email,
     password: req.body.password
   };
-  if (user.email.length === 0) {
-    res.send("Error 400: Invalid Input");
-  }
-  if (user.password.length === 0) {
+  if (user.email.length === 0 || user.password.length === 0) {
     res.send("Error 400: Invalid Input");
   };
-  users[userID] = user;
   for (currentUser in users) {
-    if (currentUser.email === users["email"]) {
+    if (users[currentUser].email === user.email) {
       res.send("Error 400: E-mail already in use")
     }
   };
+  users[userID] = user;
   res.cookie('user_id', userID);
   res.redirect("/urls");
 });
