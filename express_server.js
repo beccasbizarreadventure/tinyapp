@@ -46,8 +46,14 @@ app.get("/urls.json", (req, res) => {
 
 app.get("/register", (req, res) => {
   const currentUser = req.cookies["user_id"];
-  const user = users[currentUser]
+  const user = users[currentUser];
   res.render("register", { user });
+});
+
+app.get("/login", (req, res) => {
+  const currentUser = req.cookies["user_id"];
+  const user = users[currentUser]
+  res.render("login", { user });
 });
 
 app.post("/register", (req, res) => {
@@ -105,13 +111,19 @@ app.post("/urls", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  const username = req.body.username;
-  res.cookie('name', username);
+const { email, password } = req.body;
+let user = Object.values(users).find(user =>
+  user.email === email);
+if (user && user.password === password) {
+  res.cookie('user_id', user.id);
   res.redirect("/urls");
-})
+} else {
+  res.redirect("/login");
+}
+});
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('name');
+  res.clearCookie('user_id');
   res.redirect("/urls");
 })
 
