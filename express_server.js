@@ -12,6 +12,12 @@ const generateRandomString = () => {
   return result.slice(0, 6);
 };
 
+/*
+HELPER FUNCTIONS 
+*/
+
+// Not used yet, might use later
+
 const findUserByEmail = (email, users) => {
   for (let userId in users) {
     if (users[userId].email === email) {
@@ -25,7 +31,7 @@ const getUser = (userCookie) => {
   const thisCurrentUser = userCookie;
   const currentUser = users[thisCurrentUser];
   return currentUser;
-}
+};
 
 app.set("view engine", "ejs");
 
@@ -62,10 +68,6 @@ TEMPORARY HOMEPAGE
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
-
-// app.get("/urls.json", (req, res) => {
-//   res.json(urlDatabase);
-// });
 
 /*
 USER REGISTRATION 
@@ -121,10 +123,10 @@ app.post("/login", (req, res) => {
   }
   });
   
-  app.post("/logout", (req, res) => {
-    res.clearCookie('user_id');
-    res.redirect("/login");
-  });
+app.post("/logout", (req, res) => {
+  res.clearCookie('user_id');
+  res.redirect("/login");
+});
 
 /*
 URLs
@@ -172,7 +174,7 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${id}`);
 });
 
-// Page render for specific Tiny URL ID
+// Page for specific Tiny URL ID
 
 app.get("/urls/:id", (req, res) => {
   const id = req.params.id;
