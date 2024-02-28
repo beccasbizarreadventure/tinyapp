@@ -16,8 +16,6 @@ const generateRandomString = () => {
 HELPER FUNCTIONS 
 */
 
-// Not used yet, might use later
-
 const findUserByEmail = (email, users) => {
   for (let userId in users) {
     if (users[userId].email === email) {
@@ -88,11 +86,10 @@ app.post("/register", (req, res) => {
   if (user.email.length === 0 || user.password.length === 0) {
     res.send("Error 400: Invalid Input");
   };
-  for (currentUser in users) {
-    if (users[currentUser].email === user.email) {
-      res.send("Error 400: E-mail already in use")
-    }
-  };
+  const currentUser = findUserByEmail(user.email, users)
+    if (currentUser) {
+      return res.status(400).send("Email already in use.");
+    };
   users[userID] = user;
   res.cookie('user_id', userID);
   res.redirect("/urls");
@@ -112,10 +109,10 @@ app.post("/login", (req, res) => {
   let user = Object.values(users).find(user =>
     user.email === email);
   if (user === undefined) {
-    res.send("Error 403: Email not found");
+    res.status(403).send("Email not found");
   }
   if (user && user.password !== password) {
-    res.send("Error 403: Invalid password");
+    res.status(403).send("Invalid password");
   }
   if (user && user.password === password) {
     res.cookie('user_id', user.id);
