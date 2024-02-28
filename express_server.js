@@ -65,8 +65,14 @@ STORAGE OBJECTS
 */
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
 };
 
 const users = {
@@ -157,7 +163,7 @@ URLs
 app.post("/urls/:id", (req, res) => {
   const longURL = req.body.longURL;
   const id = req.params.id;
-  urlDatabase[id] = longURL;
+  urlDatabase[id].longURL = longURL;
   res.redirect("/urls");
 });
 
@@ -191,9 +197,11 @@ app.post("/urls", (req, res) => {
   if (!req.cookies['user_id']) {
     res.send('Please login first');
   };
-  const longURL = req.body.longURL;
   const id = generateRandomString();
-  urlDatabase[id] = longURL;
+  urlDatabase[id] = {
+    longURL: req.body.longURL,
+    userID: req.cookies["user_id"]
+  };
   res.redirect(`/urls/${id}`);
 });
 
@@ -202,8 +210,8 @@ app.post("/urls", (req, res) => {
 app.get("/urls/:id", notLoggedIn, (req, res) => {
   const id = req.params.id;
   const templateVars = { 
-    id: id, 
-    longURL: urlDatabase[id],
+    id:  req.params.id, 
+    longURL: urlDatabase[id].longURL,
     user: getUser(req.cookies["user_id"])
   };
   validURL(req, res, urlDatabase);
@@ -214,7 +222,7 @@ app.get("/urls/:id", notLoggedIn, (req, res) => {
 
 app.get("/u/:id", (req, res) => {
   const id = req.params.id;
-  const longURL = urlDatabase[id];
+  const longURL = urlDatabase[id].longURL;
   validURL(req, res, urlDatabase);
   res.redirect(longURL);
 });
