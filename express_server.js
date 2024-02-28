@@ -3,7 +3,7 @@ const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080;
 
-const generateRandomString = function() {
+const generateRandomString = () => {
  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let result = "";
   for (let i = 0; i < chars.length; i++) {
@@ -12,9 +12,30 @@ const generateRandomString = function() {
   return result.slice(0, 6);
 };
 
+const findUserByEmail = (email, users) => {
+  for (let userId in users) {
+    if (users[userId].email === email) {
+      return users[userId]; 
+    }
+  }
+  return null;
+};
+
+const getUser = (userCookie) => {
+  const thisCurrentUser = userCookie;
+  const currentUser = users[thisCurrentUser];
+  return currentUser;
+}
+
 app.set("view engine", "ejs");
 
 app.use(cookieParser());
+
+app.use(express.urlencoded({ extended: true }));
+
+/*
+STORAGE OBJECTS 
+*/
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -34,26 +55,25 @@ const users = {
   }
 };
 
-app.use(express.urlencoded({ extended: true }));
+/*
+TEMPORARY HOMEPAGE 
+*/
 
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
+// app.get("/urls.json", (req, res) => {
+//   res.json(urlDatabase);
+// });
+
+/*
+USER REGISTRATION 
+*/
 
 app.get("/register", (req, res) => {
-  const currentUser = req.cookies["user_id"];
-  const user = users[currentUser];
+  const user = getUser(req.cookies["user_id"]);
   res.render("register", { user });
-});
-
-app.get("/login", (req, res) => {
-  const currentUser = req.cookies["user_id"];
-  const user = users[currentUser]
-  res.render("login", { user });
 });
 
 app.post("/register", (req, res) => {
@@ -76,6 +96,42 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 });
 
+/*
+USER LOGIN / USER LOGOUT 
+*/
+
+app.get("/login", (req, res) => {
+  const user = getUser(req.cookies["user_id"]);
+  res.render("login", { user });
+});
+
+app.post("/login", (req, res) => {
+  const { email, password } = req.body;
+  let user = Object.values(users).find(user =>
+    user.email === email);
+  if (user === undefined) {
+    res.send("Error 403: Email not found");
+  }
+  if (user && user.password !== password) {
+    res.send("Error 403: Invalid password");
+  }
+  if (user && user.password === password) {
+    res.cookie('user_id', user.id);
+    res.redirect("/urls");
+  }
+  });
+  
+  app.post("/logout", (req, res) => {
+    res.clearCookie('user_id');
+    res.redirect("/login");
+  });
+
+/*
+URLs
+*/
+ 
+// Edit URL path 
+
 app.post("/urls/:id", (req, res) => {
   const longURL = req.body.longURL;
   const id = req.params.id;
@@ -83,25 +139,31 @@ app.post("/urls/:id", (req, res) => {
   res.redirect("/urls");
 });
 
+// New Tiny URL creation page
+
 app.get("/urls/new", (req, res) => {
-  const currentUser = req.cookies["user_id"];
-  const user = users[currentUser]
+  const user = getUser(req.cookies["user_id"]);
   res.render("urls_new", { user });
 });
 
+// URL index page
+
 app.get("/urls", (req, res) => {
-  const currentUser = req.cookies["user_id"];
   const templateVars = { 
     urls: urlDatabase,
-    user: users[currentUser] };
+    user: getUser(req.cookies["user_id"]) };
   res.render("urls_index", templateVars);
 });
+
+// Delete URL path
 
 app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
   delete urlDatabase[id];
   res.redirect("/urls");
 });
+
+// Create New Tiny URL path
 
 app.post("/urls", (req, res) => {
   const longURL = req.body.longURL;
@@ -110,39 +172,29 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${id}`);
 });
 
-app.post("/login", (req, res) => {
-const { email, password } = req.body;
-let user = Object.values(users).find(user =>
-  user.email === email);
-if (user && user.password === password) {
-  res.cookie('user_id', user.id);
-  res.redirect("/urls");
-} else {
-  res.redirect("/login");
-}
-});
-
-app.post("/logout", (req, res) => {
-  res.clearCookie('user_id');
-  res.redirect("/urls");
-})
+// Page render for specific Tiny URL ID
 
 app.get("/urls/:id", (req, res) => {
   const id = req.params.id;
-  const currentUser = req.cookies["user_id"];
   const templateVars = { 
     id: id, 
     longURL: urlDatabase[id],
-    user: users[currentUser],
+    user: getUser(req.cookies["user_id"])
   };
   res.render("urls_show", templateVars);
 });
+
+// Redirect to Long URL from Tiny URL ID 
 
 app.get("/u/:id", (req, res) => {
   const id = req.params.id;
   const longURL = urlDatabase[id];
   res.redirect(longURL);
 });
+
+/*
+CONNECTION
+*/
 
 app.listen(PORT, () => {
   console.log(`Tiny app listening on port ${PORT}!`);
