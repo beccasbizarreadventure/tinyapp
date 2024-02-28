@@ -31,6 +31,17 @@ const getUser = (userCookie) => {
   return currentUser;
 };
 
+const urlsForUser = (id) => {
+  let usersURLs = {}; 
+  for (let urlID in urlDatabase) { 
+    const currentURL = urlDatabase[urlID];
+    if (currentURL.userID === id) { 
+      usersURLs[urlID] = currentURL;
+    }
+  }
+  return usersURLs;
+};
+
 const loginState = (req, res, next) => {
   if (req.cookies['user_id']) {
     res.redirect('/urls')
@@ -185,7 +196,7 @@ app.get("/noLogin", (req, res) => {
 
 app.get("/urls", notLoggedIn, (req, res) => {
   const templateVars = { 
-    urls: urlDatabase,
+    urls: urlsForUser(req.cookies['user_id']),
     user: getUser(req.cookies["user_id"]) };
   res.render("urls_index", templateVars);
 });
