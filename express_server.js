@@ -31,6 +31,14 @@ const getUser = (userCookie) => {
   return currentUser;
 };
 
+const loginState = (req, res, next) => {
+  if (req.cookies['user_id']) {
+    res.redirect('/urls')
+  } else {
+    next();
+  }
+};
+
 app.set("view engine", "ejs");
 
 app.use(cookieParser());
@@ -71,7 +79,7 @@ app.get("/", (req, res) => {
 USER REGISTRATION 
 */
 
-app.get("/register", (req, res) => {
+app.get("/register", loginState, (req, res) => {
   const user = getUser(req.cookies["user_id"]);
   res.render("register", { user });
 });
@@ -99,7 +107,7 @@ app.post("/register", (req, res) => {
 USER LOGIN / USER LOGOUT 
 */
 
-app.get("/login", (req, res) => {
+app.get("/login", loginState, (req, res) => {
   const user = getUser(req.cookies["user_id"]);
   res.render("login", { user });
 });
