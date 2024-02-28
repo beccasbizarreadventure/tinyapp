@@ -41,7 +41,7 @@ const loginState = (req, res, next) => {
 
 const notLoggedIn = (req, res, next) => {
   if (!req.cookies['user_id']) {
-    res.redirect('/login')
+    res.redirect('/noLogin')
   } else {
     next();
   }
@@ -174,9 +174,16 @@ app.get("/urls/new", notLoggedIn, (req, res) => {
   res.render("urls_new", { user });
 });
 
+// User not logged in redirect page
+
+app.get("/noLogin", (req, res) => {
+  const user = getUser(req.cookies["user_id"]);
+  res.render("noLogin", { user });
+});
+
 // URL index page
 
-app.get("/urls", (req, res) => {
+app.get("/urls", notLoggedIn, (req, res) => {
   const templateVars = { 
     urls: urlDatabase,
     user: getUser(req.cookies["user_id"]) };
