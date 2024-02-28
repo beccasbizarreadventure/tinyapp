@@ -3,6 +3,10 @@ const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080;
 
+/*
+HELPER FUNCTIONS 
+*/
+
 const generateRandomString = () => {
  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let result = "";
@@ -11,10 +15,6 @@ const generateRandomString = () => {
   }
   return result.slice(0, 6);
 };
-
-/*
-HELPER FUNCTIONS 
-*/
 
 const findUserByEmail = (email, users) => {
   for (let userId in users) {
@@ -36,6 +36,21 @@ const loginState = (req, res, next) => {
     res.redirect('/urls')
   } else {
     next();
+  }
+};
+
+const notLoggedIn = (req, res, next) => {
+  if (!req.cookies['user_id']) {
+    res.redirect('/login')
+  } else {
+    next();
+  }
+};
+
+const validURL = (req, res, urlDatabase) => {
+  const id = req.params.id;
+  if (urlDatabase[id] === undefined) {
+    res.send("This is not a valid TinyURL")
   }
 };
 
@@ -148,7 +163,7 @@ app.post("/urls/:id", (req, res) => {
 
 // New Tiny URL creation page
 
-app.get("/urls/new", (req, res) => {
+app.get("/urls/new", notLoggedIn, (req, res) => {
   const user = getUser(req.cookies["user_id"]);
   res.render("urls_new", { user });
 });
@@ -164,7 +179,7 @@ app.get("/urls", (req, res) => {
 
 // Delete URL path
 
-app.post("/urls/:id/delete", (req, res) => {
+app.post("/urls/:id/delete", notLoggedIn, (req, res) => {
   const id = req.params.id;
   delete urlDatabase[id];
   res.redirect("/urls");
@@ -173,21 +188,25 @@ app.post("/urls/:id/delete", (req, res) => {
 // Create New Tiny URL path
 
 app.post("/urls", (req, res) => {
+  if (!req.cookies['user_id']) {
+    res.send('Please login first');
+  };
   const longURL = req.body.longURL;
   const id = generateRandomString();
   urlDatabase[id] = longURL;
   res.redirect(`/urls/${id}`);
 });
 
-// Page for specific Tiny URL ID
+// Page for specific Tiny URL ID and edit URL 
 
-app.get("/urls/:id", (req, res) => {
+app.get("/urls/:id", notLoggedIn, (req, res) => {
   const id = req.params.id;
   const templateVars = { 
     id: id, 
     longURL: urlDatabase[id],
     user: getUser(req.cookies["user_id"])
   };
+  validURL(req, res, urlDatabase);
   res.render("urls_show", templateVars);
 });
 
@@ -196,6 +215,7 @@ app.get("/urls/:id", (req, res) => {
 app.get("/u/:id", (req, res) => {
   const id = req.params.id;
   const longURL = urlDatabase[id];
+  validURL(req, res, urlDatabase);
   res.redirect(longURL);
 });
 
