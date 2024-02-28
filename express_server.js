@@ -42,6 +42,13 @@ const urlsForUser = (id) => {
   return usersURLs;
 };
 
+const notUserURL = (req, res, urlObject) => {
+  const id = req.params.id
+  if (!(id in urlObject)) {
+    res.send("This is not your URL")
+  }
+};
+
 const loginState = (req, res, next) => {
   if (req.cookies['user_id']) {
     res.redirect('/urls')
@@ -232,6 +239,8 @@ app.get("/urls/:id", notLoggedIn, (req, res) => {
     longURL: urlDatabase[id].longURL,
     user: getUser(req.cookies["user_id"])
   };
+  const urlObject = urlsForUser(id);
+  notUserURL(req, res, urlObject);
   validURL(req, res, urlDatabase);
   res.render("urls_show", templateVars);
 });
