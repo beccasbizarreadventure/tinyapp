@@ -42,12 +42,12 @@ const urlsForUser = (id) => {
   return usersURLs;
 };
 
-const notUserURL = (req, res, urlObject) => {
-  const id = req.params.id
-  if (!(id in urlObject)) {
-    res.send("This is not your URL")
-  }
-};
+// const notUserURL = (req, res, urlObject) => {
+//   const id = req.params.id
+//   if (!(id in urlObject)) {
+//     res.send("This is not your URL")
+//   }
+// };
 
 const loginState = (req, res, next) => {
   if (req.cookies['user_id']) {
@@ -239,11 +239,27 @@ app.get("/urls/:id", notLoggedIn, (req, res) => {
     longURL: urlDatabase[id].longURL,
     user: getUser(req.cookies["user_id"])
   };
-  const urlObject = urlsForUser(id);
-  notUserURL(req, res, urlObject);
   validURL(req, res, urlDatabase);
   res.render("urls_show", templateVars);
 });
+
+// app.get("/urls/:id", notLoggedIn, (req, res) => {
+//   const user = getUser(req.cookies["user_id"]);
+//   const userUrls = urlsForUser(user.id);
+//   const urlID = req.params.id;
+//   if (!userUrls[urlID]) {
+//     return res.status(403).send("This URL does not belong to you");
+//   }
+//   const templateVars = { 
+//     id: urlID, 
+//     longURL: userUrls[urlID].longURL, 
+//     user: user
+//   };
+
+//   validURL(req, res, urlDatabase);
+//   res.render("urls_show", templateVars);
+// });
+
 
 // Redirect to Long URL from Tiny URL ID 
 
