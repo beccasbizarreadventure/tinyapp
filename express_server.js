@@ -42,13 +42,6 @@ const urlsForUser = (id) => {
   return usersURLs;
 };
 
-// const notUserURL = (req, res, urlObject) => {
-//   const id = req.params.id
-//   if (!(id in urlObject)) {
-//     res.send("This is not your URL")
-//   }
-// };
-
 const loginState = (req, res, next) => {
   if (req.cookies['user_id']) {
     res.redirect('/urls')
@@ -179,6 +172,9 @@ URLs
 // Edit URL path 
 
 app.post("/urls/:id", (req, res) => {
+  if (!req.cookies['user_id']) {
+    res.send('Please login first');
+  };
   const longURL = req.body.longURL;
   const id = req.params.id;
   urlDatabase[id].longURL = longURL;
@@ -210,8 +206,12 @@ app.get("/urls", notLoggedIn, (req, res) => {
 
 // Delete URL path
 
-app.post("/urls/:id/delete", notLoggedIn, (req, res) => {
+app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
+  const user = getUser(req.cookies["user_id"]);
+  if (user === undefined || user.id !== urlDatabase[id].userID) {
+    return res.status(403).send("This URL does not belong to you. Please login to the correct account first");
+  }
   delete urlDatabase[id];
   res.redirect("/urls");
 });
@@ -234,15 +234,15 @@ app.post("/urls", (req, res) => {
 
 app.get("/urls/:id", notLoggedIn, (req, res) => {
   const id = req.params.id;
-  if (req.cookies['user_id'] !== urlDatabase[req.params.id].userID) {
-    return res.status(403).send("This URL does not belong to you");
+  validURL(req, res, urlDatabase);
+  if (req.cookies['user_id'] !== urlDatabase[id].userID) {
+    return res.status(403).send("This URL does not belong to you. Please login to the correct account first");
   }
   const templateVars = { 
     id: req.params.id, 
     longURL: urlDatabase[id].longURL, 
     user: getUser(req.cookies["user_id"])
   };
-  validURL(req, res, urlDatabase);
   res.render("urls_show", templateVars);
 });
 
@@ -250,8 +250,8 @@ app.get("/urls/:id", notLoggedIn, (req, res) => {
 
 app.get("/u/:id", (req, res) => {
   const id = req.params.id;
-  const longURL = urlDatabase[id].longURL;
   validURL(req, res, urlDatabase);
+  const longURL = urlDatabase[id].longURL;
   res.redirect(longURL);
 });
 
