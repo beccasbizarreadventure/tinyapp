@@ -1,103 +1,15 @@
+const { generateRandomString, findUserByEmail, getUser, urlsForUser, loginState, notLoggedIn, validURL } = require("./functions");
+const { urlDatabase, users } = require("./data");
 const express = require("express");
 const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080;
-
-/*
-HELPER FUNCTIONS 
-*/
-
-const generateRandomString = () => {
- const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let result = "";
-  for (let i = 0; i < chars.length; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result.slice(0, 6);
-};
-
-const findUserByEmail = (email, users) => {
-  for (let userId in users) {
-    if (users[userId].email === email) {
-      return users[userId]; 
-    }
-  }
-  return null;
-};
-
-const getUser = (userCookie) => {
-  const thisCurrentUser = userCookie;
-  const currentUser = users[thisCurrentUser];
-  return currentUser;
-};
-
-const urlsForUser = (id) => {
-  let usersURLs = {}; 
-  for (let urlID in urlDatabase) { 
-    const currentURL = urlDatabase[urlID];
-    if (currentURL.userID === id) { 
-      usersURLs[urlID] = currentURL;
-    }
-  }
-  return usersURLs;
-};
-
-const loginState = (req, res, next) => {
-  if (req.cookies['user_id']) {
-    res.redirect('/urls')
-  } else {
-    next();
-  }
-};
-
-const notLoggedIn = (req, res, next) => {
-  if (!req.cookies['user_id']) {
-    res.redirect('/noLogin')
-  } else {
-    next();
-  }
-};
-
-const validURL = (req, res, urlDatabase) => {
-  const id = req.params.id;
-  if (urlDatabase[id] === undefined) {
-    res.send("This is not a valid TinyURL")
-  }
-};
 
 app.set("view engine", "ejs");
 
 app.use(cookieParser());
 
 app.use(express.urlencoded({ extended: true }));
-
-/*
-STORAGE OBJECTS 
-*/
-
-const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userID: "aJ48lW",
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userID: "aJ48lW",
-  },
-};
-
-const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur",
-  },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk",
-  }
-};
 
 /*
 TEMPORARY HOMEPAGE 
@@ -173,7 +85,7 @@ URLs
 
 app.post("/urls/:id", (req, res) => {
   if (!req.cookies['user_id']) {
-    res.send('Please login first');
+    res.status(403).send('Please login first');
   };
   const longURL = req.body.longURL;
   const id = req.params.id;
@@ -191,8 +103,6 @@ app.get("/urls/new", notLoggedIn, (req, res) => {
 // User not logged in redirect page
 
 app.get("/noLogin", (req, res) => {
-  const user = getUser(req.cookies["user_id"]);
-  res.render("noLogin", { user });
 });
 
 // URL index page
@@ -209,8 +119,8 @@ app.get("/urls", notLoggedIn, (req, res) => {
 app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
   const user = getUser(req.cookies["user_id"]);
-  if (user === undefined || user.id !== urlDatabase[id].userID) {
-    return res.status(403).send("This URL does not belong to you. Please login to the correct account first");
+  if (user === undefined || user.id !== urlDatabase[id].userID || urlDatabase[id] === undefined) {
+    return res.status(403).send("This URL does not belong to you or does not exist");
   }
   delete urlDatabase[id];
   res.redirect("/urls");
@@ -220,7 +130,7 @@ app.post("/urls/:id/delete", (req, res) => {
 
 app.post("/urls", (req, res) => {
   if (!req.cookies['user_id']) {
-    res.send('Please login first');
+    res.status(403).send('Please login first');
   };
   const id = generateRandomString();
   urlDatabase[id] = {
