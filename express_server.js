@@ -84,12 +84,15 @@ URLs
 // Edit URL path 
 
 app.post("/urls/:id", (req, res) => {
+  const id = req.params.id;
+  const longURL = req.body.longURL;
+  urlDatabase[id].longURL = longURL;
   if (!req.cookies['user_id']) {
     res.status(403).send('Please login first');
-  };
-  const longURL = req.body.longURL;
-  const id = req.params.id;
-  urlDatabase[id].longURL = longURL;
+  }
+  if (req.cookies['user_id'] !== urlDatabase[id].userID || urlDatabase[id] === undefined) {
+    return res.status(403).send("This URL does not belong to you or does not exist");
+  }
   res.redirect("/urls");
 });
 
