@@ -234,32 +234,17 @@ app.post("/urls", (req, res) => {
 
 app.get("/urls/:id", notLoggedIn, (req, res) => {
   const id = req.params.id;
+  if (req.cookies['user_id'] !== urlDatabase[req.params.id].userID) {
+    return res.status(403).send("This URL does not belong to you");
+  }
   const templateVars = { 
-    id:  req.params.id, 
-    longURL: urlDatabase[id].longURL,
+    id: req.params.id, 
+    longURL: urlDatabase[id].longURL, 
     user: getUser(req.cookies["user_id"])
   };
   validURL(req, res, urlDatabase);
   res.render("urls_show", templateVars);
 });
-
-// app.get("/urls/:id", notLoggedIn, (req, res) => {
-//   const user = getUser(req.cookies["user_id"]);
-//   const userUrls = urlsForUser(user.id);
-//   const urlID = req.params.id;
-//   if (!userUrls[urlID]) {
-//     return res.status(403).send("This URL does not belong to you");
-//   }
-//   const templateVars = { 
-//     id: urlID, 
-//     longURL: userUrls[urlID].longURL, 
-//     user: user
-//   };
-
-//   validURL(req, res, urlDatabase);
-//   res.render("urls_show", templateVars);
-// });
-
 
 // Redirect to Long URL from Tiny URL ID 
 
