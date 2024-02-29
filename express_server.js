@@ -1,6 +1,7 @@
 const { generateRandomString, findUserByEmail, getUser, urlsForUser, loginState, notLoggedIn, validURL } = require("./functions");
 const { urlDatabase, users } = require("./data");
 const express = require("express");
+const bcrypt = require("bcryptjs");
 const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080;
@@ -36,11 +37,11 @@ app.post("/register", (req, res) => {
     password: req.body.password
   };
   if (user.email.length === 0 || user.password.length === 0) {
-    res.send("Error 400: Invalid Input");
+    return res.status(400).send("Invalid input");
   };
   const currentUser = findUserByEmail(user.email, users)
     if (currentUser) {
-      return res.status(400).send("Email already in use.");
+      return res.status(400).send("Email already in use");
     };
   users[userID] = user;
   res.cookie('user_id', userID);
@@ -61,10 +62,10 @@ app.post("/login", (req, res) => {
   let user = Object.values(users).find(user =>
     user.email === email);
   if (user === undefined) {
-    res.status(403).send("Email not found");
+    res.status(400).send("Email not found");
   }
   if (user && user.password !== password) {
-    res.status(403).send("Invalid password");
+    res.status(400).send("Invalid password");
   }
   if (user && user.password === password) {
     res.cookie('user_id', user.id);
