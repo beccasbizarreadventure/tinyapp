@@ -173,3 +173,5 @@ CONNECTION
 app.listen(PORT, () => {
   console.log(`Tiny app listening on port ${PORT}!`);
 });
+
+module.exports = { app };

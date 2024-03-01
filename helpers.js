@@ -59,7 +59,7 @@ const generateRandomString = () => {
  const validURL = (req, res, urlDatabase) => {
    const id = req.params.id;
    if (urlDatabase[id] === undefined) {
-     res.send("This is not a valid TinyURL")
+     res.status(404).send("This is not a valid TinyURL")
    }
  };
 
