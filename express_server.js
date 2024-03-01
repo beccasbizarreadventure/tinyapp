@@ -31,12 +31,14 @@ app.get("/register", loginState, (req, res) => {
 
 app.post("/register", (req, res) => {
   const userID = generateRandomString();
+  const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password);
   const user = {
     id: userID,
     email: req.body.email,
-    password: req.body.password
+    hashedPass: hashedPassword
   };
-  if (user.email.length === 0 || user.password.length === 0) {
+  if (req.body.email.length === 0 || password.length === 0) {
     return res.status(400).send("Invalid input");
   };
   const currentUser = findUserByEmail(user.email, users)
@@ -64,10 +66,10 @@ app.post("/login", (req, res) => {
   if (user === undefined) {
     res.status(400).send("Email not found");
   }
-  if (user && user.password !== password) {
+  if (bcrypt.compareSync(password, user.hashedPass) === false) {
     res.status(400).send("Invalid password");
   }
-  if (user && user.password === password) {
+  if (bcrypt.compareSync(password, user.hashedPass) === true) {
     res.cookie('user_id', user.id);
     res.redirect("/urls");
   }
