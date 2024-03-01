@@ -3,6 +3,7 @@ const { urlDatabase, users } = require("./data");
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const app = express();
 const PORT = 8080;
 
