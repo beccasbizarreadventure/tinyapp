@@ -64,19 +64,16 @@ app.get("/login", loginState, (req, res) => {
 
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
-  let user = Object.values(users).find(user =>
-    user.email === email);
-  if (user === undefined) {
-    res.status(400).send("Email not found");
+  let user = findUserByEmail(email, users);
+  if (!user) {
+    return res.status(400).send("Email not found");
   }
-  if (bcrypt.compareSync(password, user.hashedPass) === false) {
-    res.status(400).send("Invalid password");
+  if (!bcrypt.compareSync(password, user.hashedPass)) {
+    return res.status(400).send("Invalid password");
   }
-  if (bcrypt.compareSync(password, user.hashedPass) === true) {
-    res.session.user_id = user.id;
-    res.redirect("/urls");
-  }
-  });
+  req.session.user_id = user.id;
+  res.redirect("/urls");
+});
   
 app.post("/logout", (req, res) => {
   req.session.user_id = null;
