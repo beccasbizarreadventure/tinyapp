@@ -2,16 +2,18 @@ const { generateRandomString, findUserByEmail, getUser, urlsForUser, loginState,
 const { urlDatabase, users } = require("./data");
 const express = require("express");
 const bcrypt = require("bcryptjs");
-const cookieParser = require('cookie-parser');
 const cookieSession = require('cookie-session');
 const app = express();
 const PORT = 8080;
 
 app.set("view engine", "ejs");
 
-app.use(cookieParser());
-
 app.use(express.urlencoded({ extended: true }));
+
+app.use(cookieSession({ 
+  name: "session",
+  secret: "secretCookieKey"
+}));
 
 /*
 TEMPORARY HOMEPAGE 
@@ -26,7 +28,7 @@ USER REGISTRATION
 */
 
 app.get("/register", loginState, (req, res) => {
-  const user = getUser(req.cookies["user_id"]);
+  const user = getUser(req.session.user_id);
   res.render("register", { user });
 });
 
@@ -47,7 +49,7 @@ app.post("/register", (req, res) => {
       return res.status(400).send("Email already in use");
     };
   users[userID] = user;
-  res.cookie('user_id', userID);
+  req.session.user_id = userID;
   res.redirect("/urls");
 });
 
@@ -56,7 +58,7 @@ USER LOGIN / USER LOGOUT
 */
 
 app.get("/login", loginState, (req, res) => {
-  const user = getUser(req.cookies["user_id"]);
+  const user = getUser(req.session.user_id);
   res.render("login", { user });
 });
 
@@ -71,13 +73,13 @@ app.post("/login", (req, res) => {
     res.status(400).send("Invalid password");
   }
   if (bcrypt.compareSync(password, user.hashedPass) === true) {
-    res.cookie('user_id', user.id);
+    res.session.user_id = user.id;
     res.redirect("/urls");
   }
   });
   
 app.post("/logout", (req, res) => {
-  res.clearCookie('user_id');
+  req.session.user_id = null;
   res.redirect("/login");
 });
 
@@ -91,10 +93,10 @@ app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
   const longURL = req.body.longURL;
   urlDatabase[id].longURL = longURL;
-  if (!req.cookies['user_id']) {
+  if (!req.session.user_id) {
     res.status(403).send('Please login first');
   }
-  if (req.cookies['user_id'] !== urlDatabase[id].userID || urlDatabase[id] === undefined) {
+  if (req.session.user_id !== urlDatabase[id].userID || urlDatabase[id] === undefined) {
     return res.status(403).send("This URL does not belong to you or does not exist");
   }
   res.redirect("/urls");
@@ -103,7 +105,7 @@ app.post("/urls/:id", (req, res) => {
 // New Tiny URL creation page
 
 app.get("/urls/new", notLoggedIn, (req, res) => {
-  const user = getUser(req.cookies["user_id"]);
+  const user = getUser(req.session.user_id);
   res.render("urls_new", { user });
 });
 
@@ -116,8 +118,8 @@ app.get("/noLogin", (req, res) => {
 
 app.get("/urls", notLoggedIn, (req, res) => {
   const templateVars = { 
-    urls: urlsForUser(req.cookies['user_id']),
-    user: getUser(req.cookies["user_id"]) };
+    urls: urlsForUser(req.session.user_id),
+    user: getUser(req.session.user_id) };
   res.render("urls_index", templateVars);
 });
 
@@ -125,7 +127,7 @@ app.get("/urls", notLoggedIn, (req, res) => {
 
 app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
-  const user = getUser(req.cookies["user_id"]);
+  const user = getUser(req.session.user_id);
   if (user === undefined || user.id !== urlDatabase[id].userID || urlDatabase[id] === undefined) {
     return res.status(403).send("This URL does not belong to you or does not exist");
   }
@@ -136,13 +138,13 @@ app.post("/urls/:id/delete", (req, res) => {
 // Create New Tiny URL path
 
 app.post("/urls", (req, res) => {
-  if (!req.cookies['user_id']) {
+  if (!req.session.user_id) {
     res.status(403).send('Please login first');
   };
   const id = generateRandomString();
   urlDatabase[id] = {
     longURL: req.body.longURL,
-    userID: req.cookies["user_id"]
+    userID: req.session.user_id
   };
   res.redirect(`/urls/${id}`);
 });
@@ -152,13 +154,13 @@ app.post("/urls", (req, res) => {
 app.get("/urls/:id", notLoggedIn, (req, res) => {
   const id = req.params.id;
   validURL(req, res, urlDatabase);
-  if (req.cookies['user_id'] !== urlDatabase[id].userID) {
+  if (req.session.user_id !== urlDatabase[id].userID) {
     return res.status(403).send("This URL does not belong to you. Please login to the correct account first");
   }
   const templateVars = { 
     id: req.params.id, 
     longURL: urlDatabase[id].longURL, 
-    user: getUser(req.cookies["user_id"])
+    user: getUser(req.session.user_id)
   };
   res.render("urls_show", templateVars);
 });

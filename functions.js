@@ -40,7 +40,7 @@ const generateRandomString = () => {
  };
  
  const loginState = (req, res, next) => {
-   if (req.cookies['user_id']) {
+   if (req.session.user_id) {
      res.redirect('/urls')
    } else {
      next();
@@ -48,8 +48,8 @@ const generateRandomString = () => {
  };
  
  const notLoggedIn = (req, res, next) => {
-   if (!req.cookies['user_id']) {
-    const user = getUser(users, req.cookies["user_id"]);
+   if (!req.session.user_id) {
+    const user = getUser(users, req.session.user_id);
     res.status(401).render("noLogin", { user });
    } else {
      next();
