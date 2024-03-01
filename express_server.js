@@ -16,12 +16,10 @@ app.use(cookieSession({
 }));
 
 /*
-TEMPORARY HOMEPAGE 
+HOMEPAGE 
 */
 
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
+app.get("/", notLoggedIn);
 
 /*
 USER REGISTRATION 
@@ -104,11 +102,6 @@ app.post("/urls/:id", (req, res) => {
 app.get("/urls/new", notLoggedIn, (req, res) => {
   const user = getUser(users, req.session.user_id);
   res.render("urls_new", { user });
-});
-
-// User not logged in redirect page
-
-app.get("/noLogin", (req, res) => {
 });
 
 // URL index page
