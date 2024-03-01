@@ -1,4 +1,4 @@
-const { generateRandomString, findUserByEmail, getUser, urlsForUser, loginState, notLoggedIn, validURL } = require("./functions");
+const { generateRandomString, findUserByEmail, getUser, urlsForUser, loginState, notLoggedIn, validURL } = require("./helpers");
 const { urlDatabase, users } = require("./data");
 const express = require("express");
 const bcrypt = require("bcryptjs");
