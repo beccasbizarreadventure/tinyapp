@@ -118,7 +118,7 @@ app.get("/noLogin", (req, res) => {
 
 app.get("/urls", notLoggedIn, (req, res) => {
   const templateVars = { 
-    urls: urlsForUser(req.session.user_id),
+    urls: urlsForUser(urlDatabase, req.session.user_id),
     user: getUser(users, req.session.user_id) };
   res.render("urls_index", templateVars);
 });

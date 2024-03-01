@@ -28,7 +28,7 @@ const generateRandomString = () => {
    return currentUser;
  };
  
- const urlsForUser = (id) => {
+ const urlsForUser = (urlDatabase, id) => {
    let usersURLs = {}; 
    for (let urlID in urlDatabase) { 
      const currentURL = urlDatabase[urlID];
