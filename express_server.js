@@ -28,7 +28,7 @@ USER REGISTRATION
 */
 
 app.get("/register", loginState, (req, res) => {
-  const user = getUser(req.session.user_id);
+  const user = getUser(users, req.session.user_id);
   res.render("register", { user });
 });
 
@@ -58,7 +58,7 @@ USER LOGIN / USER LOGOUT
 */
 
 app.get("/login", loginState, (req, res) => {
-  const user = getUser(req.session.user_id);
+  const user = getUser(users, req.session.user_id);
   res.render("login", { user });
 });
 
@@ -105,7 +105,7 @@ app.post("/urls/:id", (req, res) => {
 // New Tiny URL creation page
 
 app.get("/urls/new", notLoggedIn, (req, res) => {
-  const user = getUser(req.session.user_id);
+  const user = getUser(users, req.session.user_id);
   res.render("urls_new", { user });
 });
 
@@ -119,7 +119,7 @@ app.get("/noLogin", (req, res) => {
 app.get("/urls", notLoggedIn, (req, res) => {
   const templateVars = { 
     urls: urlsForUser(req.session.user_id),
-    user: getUser(req.session.user_id) };
+    user: getUser(users, req.session.user_id) };
   res.render("urls_index", templateVars);
 });
 
@@ -127,7 +127,7 @@ app.get("/urls", notLoggedIn, (req, res) => {
 
 app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
-  const user = getUser(req.session.user_id);
+  const user = getUser(users, req.session.user_id);
   if (user === undefined || user.id !== urlDatabase[id].userID || urlDatabase[id] === undefined) {
     return res.status(403).send("This URL does not belong to you or does not exist");
   }
@@ -160,7 +160,7 @@ app.get("/urls/:id", notLoggedIn, (req, res) => {
   const templateVars = { 
     id: req.params.id, 
     longURL: urlDatabase[id].longURL, 
-    user: getUser(req.session.user_id)
+    user: getUser(users, req.session.user_id)
   };
   res.render("urls_show", templateVars);
 });

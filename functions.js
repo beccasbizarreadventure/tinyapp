@@ -22,7 +22,7 @@ const generateRandomString = () => {
    return null;
  };
  
- const getUser = (userCookie) => {
+ const getUser = (users, userCookie) => {
    const thisCurrentUser = userCookie;
    const currentUser = users[thisCurrentUser];
    return currentUser;
