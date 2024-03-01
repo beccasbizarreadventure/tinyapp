@@ -1,6 +1,6 @@
 const { assert } = require('chai');
 
-const { findUserByEmail } = require('../functions.js');
+const { findUserByEmail, getUser, urlsForUser, loginState, notLoggedIn, validURL } = require('../functions.js');
 
 const testUsers = {
   "userRandomID": {
@@ -19,6 +19,11 @@ describe('findUserByEmail', function() {
   it('should return a user with valid email', function() {
     const user = findUserByEmail("user@example.com", testUsers)
     const expectedUserID = "userRandomID";
-    // Write your assert statement here
+    assert.strictEqual(user.id, expectedUserID);
+  });
+  it('should return null when an email does not exist in the database', function() {
+    const user = findUserByEmail("levi@example.com", testUsers)
+    const expectedUserID = null;
+    assert.strictEqual(user, expectedUserID);
   });
 });
