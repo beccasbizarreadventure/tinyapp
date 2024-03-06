@@ -21,18 +21,9 @@ app.use(cookieSession({
 HOMEPAGE 
 */
 
-app.get("/", (req, res) => {
+app.get("/", loginState, (req, res) => {
   const user = getUser(users, req.session.user_id);
   noLoginUser(req, res, user);
-});
-
-/*
-USER NOT LOGGED IN REDIRECT
-*/
-
-app.get('/noLogin', (req, res) => {
-  const user = getUser(users, req.session.user_id);
-  res.render('noLogin', { user });
 });
 
 /*
@@ -103,7 +94,7 @@ app.post("/urls/:id", (req, res) => {
   const longURL = req.body.longURL;
   urlDatabase[id].longURL = longURL;
   if (!req.session.user_id) {
-    res.status(403).send('Please login first');
+    return res.status(403).send('Please login first');
   }
   if (req.session.user_id !== urlDatabase[id].userID || urlDatabase[id] === undefined) {
     return res.status(403).send("This URL does not belong to you or does not exist");
@@ -146,7 +137,7 @@ app.post("/urls/:id/delete", (req, res) => {
 
 app.post("/urls", (req, res) => {
   if (!req.session.user_id) {
-    res.status(403).send('Please login first');
+    return res.status(403).send('Please login first');
   };
   const id = generateRandomString();
   urlDatabase[id] = {
@@ -159,10 +150,10 @@ app.post("/urls", (req, res) => {
 // Page for specific Tiny URL ID and edit URL 
 
 app.get("/urls/:id", (req, res) => {
+  validURL(req, res, urlDatabase);
   const user = getUser(users, req.session.user_id);
   noLoginUser(req, res, user);
   const id = req.params.id;
-  validURL(req, res, urlDatabase);
   if (req.session.user_id !== urlDatabase[id].userID) {
     return res.status(403).send("This URL does not belong to you. Please login to the correct account first");
   }

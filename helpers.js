@@ -49,14 +49,14 @@ const generateRandomString = () => {
 
  const noLoginUser = (req, res, user) => {
   if (!user) {
-    res.status(302).redirect("/noLogin")
+    return res.status(302).redirect("/login")
   }
  }
  
  const validURL = (req, res, urlDatabase) => {
    const id = req.params.id;
    if (urlDatabase[id] === undefined) {
-     res.status(404).send("This is not a valid TinyURL")
+     return res.status(404).send("This is not a valid TinyURL")
    }
  };
 
