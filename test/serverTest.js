@@ -30,3 +30,25 @@ describe('GET /urls/NOTEXISTS', () => {
       });
     });
   });
+
+describe('GET /urls/new redirect', () => {
+  it('should redirect a user who is not logged in to /login', function(done) { 
+    chai.request('http://localhost:8080')
+    .get('/urls/new')
+    .end(function(err, res) {
+      expect(res).to.redirectTo('http://localhost:8080/login');;
+      done();                             
+    });
+  });
+});
+
+describe('GET / redirect', () => {
+  it('should redirect a user who is not logged in to /login', function(done) { 
+    chai.request('http://localhost:8080')
+    .get('/')
+    .end(function(err, res) {
+      expect(res).to.redirectTo('http://localhost:8080/login');;
+      done();                             
+    });
+  });
+});

@@ -41,17 +41,11 @@ const generateRandomString = () => {
  
  const loginState = (req, res, next) => {
    if (req.session.user_id) {
-     res.redirect('/urls')
+     return res.redirect('/urls')
    } else {
      next();
    }
  };
-
- const noLoginUser = (req, res, user) => {
-  if (!user) {
-    return res.status(302).redirect("/login")
-  }
- }
  
  const validURL = (req, res, urlDatabase) => {
    const id = req.params.id;
@@ -67,5 +61,4 @@ const generateRandomString = () => {
   urlsForUser,
   loginState,
   validURL,
-  noLoginUser
  };

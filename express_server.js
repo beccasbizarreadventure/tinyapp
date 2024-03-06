@@ -1,4 +1,4 @@
-const { generateRandomString, noLoginUser, findUserByEmail, getUser, urlsForUser, loginState, validURL } = require("./helpers");
+const { generateRandomString, findUserByEmail, getUser, urlsForUser, loginState, validURL } = require("./helpers");
 const { urlDatabase, users } = require("./data");
 const express = require("express");
 const bcrypt = require("bcryptjs");
@@ -23,7 +23,9 @@ HOMEPAGE
 
 app.get("/", loginState, (req, res) => {
   const user = getUser(users, req.session.user_id);
-  noLoginUser(req, res, user);
+  if (!user) {
+    return res.redirect("/login");
+  };
 });
 
 /*
@@ -32,7 +34,7 @@ USER REGISTRATION
 
 app.get("/register", loginState, (req, res) => {
   const user = getUser(users, req.session.user_id);
-  res.render("register", { user });
+  return res.render("register", { user });
 });
 
 app.post("/register", (req, res) => {
@@ -53,7 +55,7 @@ app.post("/register", (req, res) => {
     };
   users[userID] = user;
   req.session.user_id = userID;
-  res.redirect("/urls");
+  return res.redirect("/urls");
 });
 
 /*
@@ -62,7 +64,7 @@ USER LOGIN / USER LOGOUT
 
 app.get("/login", loginState, (req, res) => {
   const user = getUser(users, req.session.user_id);
-  res.render("login", { user });
+  return res.render("login", { user });
 });
 
 app.post("/login", (req, res) => {
@@ -75,12 +77,12 @@ app.post("/login", (req, res) => {
     return res.status(400).send("Invalid password");
   }
   req.session.user_id = user.id;
-  res.redirect("/urls");
+  return res.redirect("/urls");
 });
   
 app.post("/logout", (req, res) => {
   req.session.user_id = null;
-  res.redirect("/login");
+  return res.redirect("/login");
 });
 
 /*
@@ -99,26 +101,30 @@ app.post("/urls/:id", (req, res) => {
   if (req.session.user_id !== urlDatabase[id].userID || urlDatabase[id] === undefined) {
     return res.status(403).send("This URL does not belong to you or does not exist");
   }
-  res.redirect("/urls");
+  return res.redirect("/urls");
 });
 
 // New Tiny URL creation page
 
 app.get("/urls/new", (req, res) => {
   const user = getUser(users, req.session.user_id);
-  noLoginUser(req, res, user);
-  res.render("urls_new", { user });
+  if (!user) {
+    return res.redirect("/login");
+  }
+  return res.render("urls_new", { user });
 });
 
 // URL index page
 
 app.get("/urls", (req, res) => {
   const user = getUser(users, req.session.user_id);
-  noLoginUser(req, res, user);
+  if (!user) {
+    return res.redirect("/login");
+  }
   const templateVars = { 
     urls: urlsForUser(urlDatabase, req.session.user_id),
     user: getUser(users, req.session.user_id) };
-  res.render("urls_index", templateVars);
+  return res.render("urls_index", templateVars);
 });
 
 // Delete URL path
@@ -130,7 +136,7 @@ app.post("/urls/:id/delete", (req, res) => {
     return res.status(403).send("This URL does not belong to you or does not exist");
   }
   delete urlDatabase[id];
-  res.redirect("/urls");
+  return res.redirect("/urls");
 });
 
 // Create New Tiny URL path
@@ -144,16 +150,20 @@ app.post("/urls", (req, res) => {
     longURL: req.body.longURL,
     userID: req.session.user_id
   };
-  res.redirect(`/urls/${id}`);
+  return res.redirect(`/urls/${id}`);
 });
 
 // Page for specific Tiny URL ID and edit URL 
 
 app.get("/urls/:id", (req, res) => {
-  validURL(req, res, urlDatabase);
-  const user = getUser(users, req.session.user_id);
-  noLoginUser(req, res, user);
   const id = req.params.id;
+  const user = getUser(users, req.session.user_id);
+  if (urlDatabase[id] === undefined) {
+    return res.status(404).send("This is not a valid TinyURL")
+  }
+  if (!user) {
+    return res.redirect("/login");
+  }
   if (req.session.user_id !== urlDatabase[id].userID) {
     return res.status(403).send("This URL does not belong to you. Please login to the correct account first");
   }
@@ -162,7 +172,7 @@ app.get("/urls/:id", (req, res) => {
     longURL: urlDatabase[id].longURL, 
     user: getUser(users, req.session.user_id)
   };
-  res.render("urls_show", templateVars);
+  return res.render("urls_show", templateVars);
 });
 
 // Redirect to Long URL from Tiny URL ID 
@@ -171,7 +181,7 @@ app.get("/u/:id", (req, res) => {
   const id = req.params.id;
   validURL(req, res, urlDatabase);
   const longURL = urlDatabase[id].longURL;
-  res.redirect(longURL);
+  return res.redirect(longURL);
 });
 
 /*
