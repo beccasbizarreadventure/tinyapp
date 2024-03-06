@@ -47,14 +47,20 @@ const generateRandomString = () => {
    }
  };
  
- const notLoggedIn = (req, res, next) => {
-   if (!req.session.user_id) {
-    const user = getUser(users, req.session.user_id);
-    res.status(401).render("noLogin", { user });
-   } else {
-     next();
-   }
- };
+//  const notLoggedIn = (req, res, next) => {
+//    if (!req.session.user_id) {
+//     const user = getUser(users, req.session.user_id);
+//     res.status(401).render("noLogin", { user });
+//    } else {
+//      next();
+//    }
+//  };
+
+ const noLoginUser = (req, res, user) => {
+  if (!user) {
+    res.status(403).redirect("/noLogin")
+  }
+ }
  
  const validURL = (req, res, urlDatabase) => {
    const id = req.params.id;
@@ -69,6 +75,6 @@ const generateRandomString = () => {
   getUser,
   urlsForUser,
   loginState,
-  notLoggedIn,
-  validURL
+  validURL,
+  noLoginUser
  };

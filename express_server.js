@@ -1,4 +1,4 @@
-const { generateRandomString, findUserByEmail, getUser, urlsForUser, loginState, notLoggedIn, validURL } = require("./helpers");
+const { generateRandomString, noLoginUser, findUserByEmail, getUser, urlsForUser, loginState, validURL } = require("./helpers");
 const { urlDatabase, users } = require("./data");
 const express = require("express");
 const bcrypt = require("bcryptjs");
@@ -21,7 +21,19 @@ app.use(cookieSession({
 HOMEPAGE 
 */
 
-app.get("/", notLoggedIn);
+app.get("/", (req, res) => {
+  const user = getUser(users, req.session.user_id);
+  noLoginUser(req, res, user);
+});
+
+/*
+USER NOT LOGGED IN REDIRECT
+*/
+
+app.get('/noLogin', (req, res) => {
+  const user = getUser(users, req.session.user_id);
+  res.render('noLogin', { user });
+});
 
 /*
 USER REGISTRATION 
@@ -101,14 +113,17 @@ app.post("/urls/:id", (req, res) => {
 
 // New Tiny URL creation page
 
-app.get("/urls/new", notLoggedIn, (req, res) => {
+app.get("/urls/new", (req, res) => {
   const user = getUser(users, req.session.user_id);
+  noLoginUser(req, res, user);
   res.render("urls_new", { user });
 });
 
 // URL index page
 
-app.get("/urls", notLoggedIn, (req, res) => {
+app.get("/urls", (req, res) => {
+  const user = getUser(users, req.session.user_id);
+  noLoginUser(req, res, user);
   const templateVars = { 
     urls: urlsForUser(urlDatabase, req.session.user_id),
     user: getUser(users, req.session.user_id) };
@@ -143,7 +158,9 @@ app.post("/urls", (req, res) => {
 
 // Page for specific Tiny URL ID and edit URL 
 
-app.get("/urls/:id", notLoggedIn, (req, res) => {
+app.get("/urls/:id", (req, res) => {
+  const user = getUser(users, req.session.user_id);
+  noLoginUser(req, res, user);
   const id = req.params.id;
   validURL(req, res, urlDatabase);
   if (req.session.user_id !== urlDatabase[id].userID) {
