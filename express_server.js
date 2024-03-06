@@ -1,4 +1,4 @@
-const { generateRandomString, findUserByEmail, getUser, urlsForUser, loginState, validURL } = require("./helpers");
+const { generateRandomString, findUserByEmail, getUser, urlsForUser, loginState } = require("./helpers");
 const { urlDatabase, users } = require("./data");
 const express = require("express");
 const bcrypt = require("bcryptjs");
@@ -179,7 +179,9 @@ app.get("/urls/:id", (req, res) => {
 
 app.get("/u/:id", (req, res) => {
   const id = req.params.id;
-  validURL(req, res, urlDatabase);
+  if (urlDatabase[id] === undefined) {
+    return res.status(404).send("This is not a valid TinyURL")
+  }
   const longURL = urlDatabase[id].longURL;
   return res.redirect(longURL);
 });

@@ -47,12 +47,6 @@ const generateRandomString = () => {
    }
  };
  
- const validURL = (req, res, urlDatabase) => {
-   const id = req.params.id;
-   if (urlDatabase[id] === undefined) {
-     return res.status(404).send("This is not a valid TinyURL")
-   }
- };
 
  module.exports = {
   generateRandomString,
@@ -60,5 +54,4 @@ const generateRandomString = () => {
   getUser,
   urlsForUser,
   loginState,
-  validURL,
  };
