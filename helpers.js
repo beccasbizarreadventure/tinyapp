@@ -2,7 +2,7 @@
 HELPER FUNCTIONS 
 */
 
-const {urlDatabase, users} = require("./data");
+const { urlDatabase, users } = require("./data");
 
 const generateRandomString = () => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -46,19 +46,10 @@ const generateRandomString = () => {
      next();
    }
  };
- 
-//  const notLoggedIn = (req, res, next) => {
-//    if (!req.session.user_id) {
-//     const user = getUser(users, req.session.user_id);
-//     res.status(401).render("noLogin", { user });
-//    } else {
-//      next();
-//    }
-//  };
 
  const noLoginUser = (req, res, user) => {
   if (!user) {
-    res.status(403).redirect("/noLogin")
+    res.status(302).redirect("/noLogin")
   }
  }
  
