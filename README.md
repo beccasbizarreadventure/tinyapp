@@ -29,6 +29,7 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 - You can view the details about your Tiny URL and update the URL on the individual Tiny URL page
 ![Preview of Tiny URL page](<imgs_for_readme/Tiny Page TA.png>)
+The 'Short URL ID' link will lead you to the page of the shortened URL
 
 - You can manage your Tiny URLs on the main My URLs page. You can delete or edit your URLs from here
 ![Preview of My URLs page](<imgs_for_readme/My URLs TA.png>)
