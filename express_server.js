@@ -12,24 +12,24 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(express.json());
 
-app.use(cookieSession({ 
+app.use(cookieSession({
   name: "session",
   secret: "secretCookieKey"
 }));
 
 /*
-HOMEPAGE 
+HOMEPAGE
 */
 
 app.get("/", loginState, (req, res) => {
   const user = getUser(users, req.session.user_id);
   if (!user) {
     return res.redirect("/login");
-  };
+  }
 });
 
 /*
-USER REGISTRATION 
+USER REGISTRATION
 */
 
 app.get("/register", loginState, (req, res) => {
@@ -48,18 +48,18 @@ app.post("/register", (req, res) => {
   };
   if (req.body.email.length === 0 || password.length === 0) {
     return res.status(400).send("Invalid input");
-  };
-  const currentUser = findUserByEmail(user.email, users)
-    if (currentUser) {
-      return res.status(400).send("Email already in use");
-    };
+  }
+  const currentUser = findUserByEmail(user.email, users);
+  if (currentUser) {
+    return res.status(400).send("Email already in use");
+  }
   users[userID] = user;
   req.session.user_id = userID;
   return res.redirect("/urls");
 });
 
 /*
-USER LOGIN / USER LOGOUT 
+USER LOGIN / USER LOGOUT
 */
 
 app.get("/login", loginState, (req, res) => {
@@ -89,7 +89,7 @@ app.post("/logout", (req, res) => {
 URLs
 */
  
-// Edit URL path 
+// Edit URL path
 
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
@@ -121,7 +121,7 @@ app.get("/urls", (req, res) => {
   if (!user) {
     return res.redirect("/login");
   }
-  const templateVars = { 
+  const templateVars = {
     urls: urlsForUser(urlDatabase, req.session.user_id),
     user: getUser(users, req.session.user_id) };
   return res.render("urls_index", templateVars);
@@ -144,7 +144,7 @@ app.post("/urls/:id/delete", (req, res) => {
 app.post("/urls", (req, res) => {
   if (!req.session.user_id) {
     return res.status(403).send('Please login first');
-  };
+  }
   const id = generateRandomString();
   urlDatabase[id] = {
     longURL: req.body.longURL,
@@ -153,13 +153,13 @@ app.post("/urls", (req, res) => {
   return res.redirect(`/urls/${id}`);
 });
 
-// Page for specific Tiny URL ID and edit URL 
+// Page for specific Tiny URL ID and edit URL
 
 app.get("/urls/:id", (req, res) => {
   const id = req.params.id;
   const user = getUser(users, req.session.user_id);
   if (urlDatabase[id] === undefined) {
-    return res.status(404).send("This is not a valid TinyURL")
+    return res.status(404).send("This is not a valid TinyURL");
   }
   if (!user) {
     return res.redirect("/login");
@@ -167,20 +167,20 @@ app.get("/urls/:id", (req, res) => {
   if (req.session.user_id !== urlDatabase[id].userID) {
     return res.status(403).send("This URL does not belong to you. Please login to the correct account first");
   }
-  const templateVars = { 
-    id: req.params.id, 
-    longURL: urlDatabase[id].longURL, 
+  const templateVars = {
+    id: req.params.id,
+    longURL: urlDatabase[id].longURL,
     user: getUser(users, req.session.user_id)
   };
   return res.render("urls_show", templateVars);
 });
 
-// Redirect to Long URL from Tiny URL ID 
+// Redirect to Long URL from Tiny URL ID
 
 app.get("/u/:id", (req, res) => {
   const id = req.params.id;
   if (urlDatabase[id] === undefined) {
-    return res.status(404).send("This is not a valid TinyURL")
+    return res.status(404).send("This is not a valid TinyURL");
   }
   const longURL = urlDatabase[id].longURL;
   return res.redirect(longURL);
