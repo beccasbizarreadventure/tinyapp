@@ -47,11 +47,11 @@ app.post("/register", (req, res) => {
     hashedPass: hashedPassword
   };
   if (req.body.email.length === 0 || password.length === 0) {
-    return res.status(400).render('register', {error: "Invalid input. Please submit a valid email and password", user: user});
+    return res.status(400).send("Invalid input");
   };
   const currentUser = findUserByEmail(user.email, users)
     if (currentUser) {
-      return res.status(400).render('register', {error: "Email already in use", user: user});
+      return res.status(400).send("Email already in use");
     };
   users[userID] = user;
   req.session.user_id = userID;
@@ -67,16 +67,17 @@ app.get("/login", loginState, (req, res) => {
   return res.render("login", { user });
 });
 
-app.post('/login', (req, res) => {
-  const user = findUserByEmail(req.body.email, users);
+app.post("/login", (req, res) => {
+  const { email, password } = req.body;
+  let user = findUserByEmail(email, users);
   if (!user) {
-    return res.status(404).render('login', {error: "A user with this email cannot be found", user: user});
+    return res.status(404).send("Email not found");
   }
-  else if (!bcrypt.compareSync(req.body.password, users[user].password)) {
-    return res.status(400).render('login', {error: "Incorrect password", user: user});
+  if (!bcrypt.compareSync(password, user.hashedPass)) {
+    return res.status(400).send("Invalid password");
   }
-  req.session['user_id'] = users[user];
-  res.redirect('/urls');
+  req.session.user_id = user.id;
+  return res.redirect("/urls");
 });
   
 app.post("/logout", (req, res) => {

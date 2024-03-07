@@ -24,11 +24,6 @@
         <div class="card-header"></div>
         <div class="card-body">
       <h3>Login</h3>
-      <% if (typeof error !== 'undefined' && error !== null) { %>
-        <div class="alert alert-danger" role="alert">
-            <%= error %>
-        </div>
-    <% } %>
       <form class="form-inline" action="/login" method="POST">
         <div class="form-group mb-2, mx-auto">
         <label for="email">Email:</label>
