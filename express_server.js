@@ -14,7 +14,7 @@ app.use(express.json());
 
 app.use(cookieSession({
   name: "session",
-  secret: "secretCookieKey"
+  keys: ["secretCookieKey", "raisinCookie", "chocolateChip"]
 }));
 
 /*
